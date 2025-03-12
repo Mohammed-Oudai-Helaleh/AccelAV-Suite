@@ -721,3 +721,25 @@ class VideoPlayer:
         print(f"Shuffle mode: Switching to random file: {new_video_path}")
         self.load_video(new_video_path)
         self.play_video()
+
+    def open_audio_extraction_window(self):
+        # Check if a file is loaded
+        if not self.video_path:
+            self.flash_message("Please load a video file before attempting audio extraction.")
+            return
+
+        # Check if the loaded file is an audio file
+        if self.is_audio_file:
+            self.flash_message("Audio extraction is only available for video files.")
+            return
+
+        # Otherwise, open the audio extraction window
+        from AudioExtractionWindow import AudioExtractionWindow
+        AudioExtractionWindow(self)
+
+    def flash_message(self, message, duration=2000):
+        """Display a flash message on the top left of the canvas for a few seconds."""
+        label = tk.Label(self.canvas, text=message, bg="black", fg="white", font=("Helvetica", 12, "bold"))
+        # Place the label at the top left (with a small offset)
+        label.place(relx=0, rely=0, anchor="nw", x=10, y=10)
+        label.after(duration, label.destroy)

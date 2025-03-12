@@ -175,8 +175,7 @@ class VideoPlayerUI:
 
     # --------------------- New Feature Methods ---------------------
     def extract_audio(self):
-        """Stub for extract audio functionality."""
-        print("Extract Audio button clicked.")
+        self.player.open_audio_extraction_window()
 
     def toggle_loop(self):
         current_mode = self.player.loop_mode
