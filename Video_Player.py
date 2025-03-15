@@ -737,7 +737,7 @@ class VideoPlayer:
         from AudioExtractionWindow import AudioExtractionWindow
         AudioExtractionWindow(self)
 
-    def flash_message(self, message, duration=2000):
+    def flash_message(self, message, duration=3000):
         """Display a flash message on the top left of the canvas for a few seconds."""
         label = tk.Label(self.canvas, text=message, bg="black", fg="white", font=("Helvetica", 12, "bold"))
         # Place the label at the top left (with a small offset)
