@@ -26,8 +26,21 @@ class VideoPlayerUI:
         self.progress_frame = tk.Frame(self.control_frame, bg="gray", height=2)
         self.progress_frame.pack(fill=tk.X, padx=5, pady=(2, 0))
         
+        style = ttk.Style(self.root)
+        style.theme_use('clam')
+        style.configure("Custom.Horizontal.TProgressbar",
+                        troughcolor='#303030',    # Lighter black for the trough
+                        background='#A0A0A0',      # Example lighter gray for the moving part
+                        bordercolor='#101010',
+                        lightcolor='#A0A0A0',
+                        darkcolor='#303030',
+                        thickness=8)
+        
         self.progress_var = tk.DoubleVar(value=0)
-        self.progress_bar = ttk.Progressbar(self.progress_frame, variable=self.progress_var, maximum=100)
+        self.progress_bar = ttk.Progressbar(self.progress_frame,
+                                    style="Custom.Horizontal.TProgressbar",
+                                    variable=self.progress_var,
+                                    maximum=100)
         self.progress_bar.pack(fill=tk.X, side=tk.LEFT, expand=True)
         
         self.progress_bar.bind("<Button-1>", self.seek_video)
