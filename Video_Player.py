@@ -80,9 +80,12 @@ class VideoPlayer:
         self.ended = False         # Flag to indicate if the file ended in no_loop mode
         self._end_handled = False   # Internal flag to prevent repeated end-of-file handling
         self.end_lock = threading.Lock()  # Lock for end-of-file handling
+        
+        self.current_volume = 1.0
 
     # --------------------- Media Loading & Configuration ---------------------
     def load_video(self, video_path):
+        previous_volume = getattr(self, 'current_volume', 1.0)
         self._end_handled = False
         self.video_path = video_path
         self.is_audio_file = False
@@ -190,6 +193,9 @@ class VideoPlayer:
             return
 
         self.update_canvas_size(self.canvas.winfo_width(), self.canvas.winfo_height())
+        self.current_volume = previous_volume
+        if self.audio_channel and self.audio_channel.get_busy():
+            self.audio_channel.set_volume(self.current_volume)
 
 
     def update_canvas_size(self, new_width, new_height):
@@ -229,6 +235,7 @@ class VideoPlayer:
             self.playback_start_time = time.perf_counter()
         if self.audio_sound:
             self.audio_channel = self.audio_sound.play()
+            self.audio_channel.set_volume(self.current_volume)
 
         # Only start decoding thread for video files
         if not self.is_audio_file:
@@ -244,6 +251,7 @@ class VideoPlayer:
 
     def _stop_playback(self):
         """Internal method to stop playback (used by load_video)"""
+        previous_volume = getattr(self, 'current_volume', 1.0)
         self.running = False
         self.paused = False
 
@@ -289,6 +297,7 @@ class VideoPlayer:
 
         # Force a UI update after cleanup
         self.update_display(force=True)
+        self.current_volume = previous_volume
 
     def handle_loop_end(self):
         if self.speed_multiplier > 0:
@@ -541,6 +550,7 @@ class VideoPlayer:
             sliced_audio = self.audio_array_int[audio_offset:]
             self.audio_sound = pygame.sndarray.make_sound(sliced_audio)
             self.audio_channel = self.audio_sound.play()
+            self.audio_channel.set_volume(self.current_volume)
 
         # Schedule GUI update on main thread using event
         self.canvas.event_generate("<<SeekUpdate>>", when="tail")
@@ -593,8 +603,8 @@ class VideoPlayer:
                     
                     self.audio_sound = pygame.sndarray.make_sound(sliced_audio)
                     self.audio_channel = self.audio_sound.play()
-                    # Sync audio to video timing
-                    self.audio_channel.set_volume(self.audio_channel.get_volume())
+                    # Apply the stored volume setting
+                    self.audio_channel.set_volume(self.current_volume)  # Changed line
                     
         # Force immediate frame update
         if not self.paused:
@@ -611,9 +621,9 @@ class VideoPlayer:
 
     def set_volume(self, volume):
         """Set audio volume (0.0 to 1.0)"""
+        volume = max(0.0, min(1.0, float(volume)))
+        self.current_volume = volume  # Store the volume
         if self.audio_channel:
-            # Ensure volume is within valid range
-            volume = max(0.0, min(1.0, float(volume)))
             self.audio_channel.set_volume(volume)
 
 
